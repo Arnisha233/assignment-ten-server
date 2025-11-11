@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = 3000;
 
@@ -27,11 +27,83 @@ async function run() {
     const db = client.db("car-rent-db");
     const carsCollection = db.collection("cars");
 
+    // get method for all listins
+
+    app.get("/cars", async (req, res) => {
+      const result = await carsCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.get("/cars/:id", async (req, res) => {
+      const { id } = req.params;
+      console.log(id);
+      const objectId = new ObjectId(id);
+      const result = await carsCollection.findOne({ _id: objectId });
+      res.send({
+        success: true,
+        result,
+      });
+    });
+
     // post method for Add Car
     app.post("/cars", async (req, res) => {
       const data = req.body;
       console.log(data);
       const result = await carsCollection.insertOne(data);
+      res.send({
+        success: true,
+        result,
+      });
+    });
+
+    // put
+    app.put("/cars/:id", async (req, res) => {
+      const { id } = req.params;
+      const data = req.body;
+      // console.log(id);
+      // console.log(data);
+      const objectId = new ObjectId(id);
+      const filter = { _id: objectId };
+      const update = {
+        $set: data,
+      };
+      const result = await carsCollection.updateOne(filter, update);
+      res.send({
+        success: true,
+        result,
+      });
+    });
+
+    // delete
+
+    app.delete("/cars/:id", async (req, res) => {
+      const { id } = req.params;
+      const objectId = new ObjectId(id);
+      const filter = { _id: objectId };
+      const result = await carsCollection.deleteOne(filter);
+      res.send({
+        success: true,
+        result,
+      });
+    });
+
+    // 6 newest cars
+    app.get("/newest-cars", async (req, res) => {
+      const result = await carsCollection
+        .find()
+        .sort({ _id: "desc" })
+        .limit(6)
+        .toArray();
+      console.log(result);
+      res.send(result);
+    });
+
+    // details
+    app.get("/newest-cars/:id", async (req, res) => {
+      const { id } = req.params;
+      console.log(id);
+      const objectId = new ObjectId(id);
+      const result = await carsCollection.findOne({ _id: objectId });
       res.send({
         success: true,
         result,
