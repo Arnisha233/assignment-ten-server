@@ -26,6 +26,7 @@ async function run() {
 
     const db = client.db("car-rent-db");
     const carsCollection = db.collection("cars");
+    const bookingCollection = db.collection("booking");
 
     // get method for all listins
 
@@ -108,6 +109,21 @@ async function run() {
         success: true,
         result,
       });
+    });
+
+    // booking
+    app.post("/booking", async (req, res) => {
+      const data = req.body;
+      const result = await bookingCollection.insertOne(data);
+      res.send(result);
+    });
+
+    app.get("/my-booking", async (req, res) => {
+      const email = req.query.email;
+      const result = await bookingCollection
+        .find({ Provider_Email: email })
+        .toArray();
+      res.send(result);
     });
 
     // Send a ping to confirm a successful connection
