@@ -126,6 +126,15 @@ async function run() {
       res.send(result);
     });
 
+    // search api
+    app.get("/search", async (req, res) => {
+      const search_text = req.query.search;
+      const result = await carsCollection
+        .find({ name: { $regex: search_text, $options: "i" } })
+        .toArray();
+      res.send(result);
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
